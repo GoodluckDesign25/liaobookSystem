@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>李奥预约系统 · 实时时段</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f7 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: #1e2b3a;
+    }
+
+    .booking-container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 20, 40, 0.25), 0 1px 3px rgba(0,0,0,0.05);
+      padding: 2rem 2rem 2.5rem;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    .header {
+      margin-bottom: 2rem;
+      text-align: left;
+      border-bottom: 2px solid rgba(44, 82, 130, 0.12);
+      padding-bottom: 1.5rem;
+    }
+
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b2b44;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .header h1::before {
+      content: "📅";
+      font-size: 2.2rem;
+      filter: drop-shadow(0 4px 6px rgba(30, 80, 150, 0.2));
+    }
+
+    .header .sub {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #3d5b7a;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .header .sub .live-time {
+      background: #1d4e7a;
+      padding: 0.25rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: white;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: #ffffffd9;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 1.8rem;
+      padding: 1.6rem 1.5rem;
+      box-shadow: 0 10px 20px -8px rgba(0, 30, 60, 0.1), 0 0 0 1px rgba(255,255,255,0.7) inset;
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #143750;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card h2 i {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .date-picker-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .date-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #2e4b6b;
+      letter-spacing: 0.2px;
+    }
+
+    .date-label span:last-child {
+      font-weight: 400;
+      color: #6b8aa8;
+      font-size: 0.8rem;
+    }
+
+    .date-input-group {
+      display: flex;
+      align-items: center;
+      background: #f0f6fe;
+      border-radius: 60px;
+      padding: 0.2rem 0.2rem 0.2rem 1.4rem;
+      border: 1px solid #c9dceb;
+      transition: all 0.15s;
+    }
+
+    .date-input-group:focus-within {
+      border-color: #3a7ca5;
+      box-shadow: 0 0 0 4px rgba(58, 124, 165, 0.15);
+      background: #ffffff;
+    }
+
+    .date-input-group input[type="date"] {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #0b2b44;
+      padding: 0.8rem 0;
+      outline: none;
+      cursor: pointer;
+      color-scheme: light;
+    }
+
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.5;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .date-input-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .quick-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.25rem;
+    }
+
+    .quick-date-btn {
+      background: white;
+      border: 1px solid #cfe1f0;
+      color: #1d4e7a;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.45rem 1rem;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .quick-date-btn:hover {
+      background: #d9eafb;
+      border-color: #98b9d6;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 12px -8px rgba(30, 80, 150, 0.2);
+    }
+
+    .quick-date-btn.active {
+      background: #1d4e7a;
+      border-color: #1d4e7a;
+      color: white;
+      box-shadow: 0 6px 12px -6px #1d4e7a70;
+    }
+
+    .time-slots {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    .time-category {
+      margin-bottom: 0.3rem;
+    }
+
+    .time-category h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #527a9b;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .time-category h3 .count-badge {
+      background: #d9e8f5;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.6rem;
+      border-radius: 40px;
+      color: #1d4e7a;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .slot-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .slot-btn {
+      background: #ffffff;
+      border: 1.5px solid #d2e2f0;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.55rem 1rem;
+      border-radius: 40px;
+      color: #1b3b55;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      flex: 0 1 auto;
+      min-width: 85px;
+      text-align: center;
+      letter-spacing: 0.2px;
+    }
+
+    .slot-btn:hover:not(:disabled) {
+      background: #e3effa;
+      border-color: #8bb3d1;
+      transform: translateY(-1px);
+    }
+
+    .slot-btn.selected {
+      background: #1d4e7a;
+      border-color: #1d4e7a;
+      color: white;
+      box-shadow: 0 8px 12px -8px #1d4e7a;
+    }
+
+    .slot-btn:disabled {
+      background: #f3f6f9;
+      border-color: #e0e8f0;
+      color: #a8bccd;
+      cursor: not-allowed;
+      text-decoration: line-through;
+      opacity: 0.75;
+    }
+
+    .slot-btn .expired-tag {
+      font-size: 0.6rem;
+      background: #e5eef7;
+      color: #8ba2b8;
+      padding: 0.1rem 0.4rem;
+      border-radius: 30px;
+      margin-left: 0.3rem;
+    }
+
+    .slot-empty-message {
+      font-size: 0.8rem;
+      color: #9b2c2c;
+      background: #ffeaea;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      border: 1px solid #f5c2c2;
+    }
+
+    .content-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .appointment-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .appointment-item {
+      background: #f7fbfe;
+      border-radius: 1.5rem;
+      padding: 1.2rem 1.25rem;
+      border: 1px solid #e2eef9;
+      transition: 0.15s;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+    }
+
+    .appointment-item:hover {
+      border-color: #b8d2e8;
+      background: #ffffff;
+      box-shadow: 0 12px 18px -12px rgba(23, 68, 112, 0.18);
+    }
+
+    .item-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+      min-width: 2.2rem;
+      text-align: center;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #12304a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.8rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .item-badge {
+      background: #dbecfc;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #15507a;
+      padding: 0.2rem 0.6rem;
+      border-radius: 60px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .item-desc {
+      font-size: 0.85rem;
+      color: #3f5e7a;
+      line-height: 1.45;
+      margin-bottom: 0.4rem;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: #6f8ca5;
+      border-top: 1px dashed #c6d9ea;
+      padding-top: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .item-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .summary-box {
+      background: #eaf2fb;
+      border-radius: 1.5rem;
+      padding: 1.2rem 1.5rem;
+      margin-top: 0.4rem;
+      border: 1px solid #c3daf0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .summary-label {
+      font-weight: 500;
+      color: #385e7c;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: #0f314b;
+      background: white;
+      padding: 0.25rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      border: 1px solid #cedfef;
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .confirm-btn {
+      background: #1d4e7a;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 60px;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 15px 25px -10px #1d4e7a80;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .confirm-btn:hover {
+      background: #0b3654;
+      transform: scale(1.01);
+      box-shadow: 0 18px 28px -8px #0b3654b0;
+    }
+
+    .confirm-btn:active {
+      transform: scale(0.98);
+    }
+
+    @media (max-width: 800px) {
+      .booking-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .booking-container {
+        padding: 1.5rem;
+      }
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      .summary-value {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 450px) {
+      .slot-btn {
+        min-width: 70px;
+        font-size: 0.75rem;
+        padding: 0.45rem 0.7rem;
+      }
+      .quick-date-btn {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="booking-container">
+    <div class="header">
+      <h1>李奥预约系统</h1>
+      <div class="sub">
+        选择日期与时段 · 查看预约内容功能
+        <span class="live-time">
+          <span class="live-dot"></span>
+          <span id="liveClock">--:--:--</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="booking-grid">
+      <!-- 左侧 -->
+      <div class="card" style="padding-bottom: 1.8rem;">
+        <h2><i>🗓️</i> 日期 &amp; 时段</h2>
+        
+        <div class="date-picker-wrapper">
+          <div class="date-label">
+            <span>选择预约日期</span>
+            <span>必填</span>
+          </div>
+          <div class="date-input-group">
+            <input type="date" id="datePicker">
+          </div>
+          <div class="quick-dates" id="quickDatesContainer">
+            <button class="quick-date-btn" data-offset="0">📌 今天</button>
+            <button class="quick-date-btn" data-offset="1">📌 明天</button>
+            <button class="quick-date-btn" data-offset="2">📌 后天</button>
+            <button class="quick-date-btn" data-offset="7">📌 一周后</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.8rem;">
+          <div class="date-label" style="margin-bottom: 0.9rem;">
+            <span>⏰ 可预约时段</span>
+            <span>单选 · 实时更新</span>
+          </div>
+
+          <div class="time-slots" id="timeSlotsContainer">
+            <div class="time-category">
+              <h3>上午 <span class="count-badge" id="morningCount">0</span></h3>
+              <div class="slot-grid" id="morningSlots"></div>
+            </div>
+            <div class="time-category">
+              <h3>下午 <span class="count-badge" id="afternoonCount">0</span></h3>
+              <div class="slot-grid" id="afternoonSlots"></div>
+            </div>
+          </div>
+          <div id="emptySlotMessage" style="margin-top: 0.8rem; display: none;" class="slot-empty-message">
+            ⚠️ 该日期已无可预约时段，请选择其他日期
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧 -->
+      <div class="card content-panel">
+        <h2><i>📋</i> 预约内容与功能</h2>
+
+        <div class="appointment-items">
+          <div class="appointment-item">
+            <div class="item-icon">🧠</div>
+            <div class="item-details">
+              <div class="item-title">
+                李奥深度咨询
+                <span class="item-badge">1对1</span>
+              </div>
+              <div class="item-desc">
+                与李奥本人进行60分钟线上视频咨询，涵盖职业规划、技术架构、个人成长等话题。提供录播回放与笔记。
+              </div>
+              <div class="item-meta">
+                <span>⏱️ 60分钟</span>
+                <span>💻 线上会议</span>
+                <span>📎 含资料</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="appointment-item">
+            <div class="item-icon">📐</div>
+            <div class="item-details">
+              <div class="item-title">
+                项目评审工作坊
+                <span class="item-badge">团队</span>
+              </div>
+              <div class="item-desc">
+                针对您提交的项目方案进行90分钟深度评审，李奥与特邀专家提供可行性建议及优化路线。
+              </div>
+              <div class="item-meta">
+                <span>⏱️ 90分钟</span>
+                <span>👥 最多4人</span>
+                <span>📊 评审报告</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="appointment-item">
+            <div class="item-icon">⚡</div>
+            <div class="item-details">
+              <div class="item-title">
+                快速答疑
+                <span class="item-badge">轻量</span>
+              </div>
+              <div class="item-desc">
+                15分钟快速响应，解决一个具体技术或决策问题。适合时间紧张但需要明确方向的场景。
+              </div>
+              <div class="item-meta">
+                <span>⏱️ 15分钟</span>
+                <span>📞 语音/文字</span>
+                <span>🔹 单问题</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="appointment-item">
+            <div class="item-icon">🔍</div>
+            <div class="item-details">
+              <div class="item-title">
+                代码/设计走查
+                <span class="item-badge">详细</span>
+              </div>
+              <div class="item-desc">
+                45分钟针对代码库或UI设计稿的走查，提供可落地的改进清单与最佳实践建议。
+              </div>
+              <div class="item-meta">
+                <span>⏱️ 45分钟</span>
+                <span>📁 需提前提交</span>
+                <span>📝 走查清单</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="summary-label">📅 已选日期</span>
+            <span class="summary-value" id="selectedDateDisplay">--</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">⏰ 已选时段</span>
+            <span class="summary-value" id="selectedTimeDisplay">— 请选择 —</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">📌 预约内容</span>
+            <span class="summary-value" style="font-size: 0.8rem; white-space: normal;">根据时段匹配可用功能</span>
+          </div>
+        </div>
+
+        <button class="confirm-btn" id="confirmBtn">
+          ✅ 确认预约
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ========== 实时时间核心 ==========
+      let currentDate = '';       // YYYY-MM-DD
+      let selectedSlot = null;    // '09:00-10:00'
+
+      // DOM
+      const datePicker = document.getElementById('datePicker');
+      const morningSlots = document.getElementById('morningSlots');
+      const afternoonSlots = document.getElementById('afternoonSlots');
+      const emptySlotMessage = document.getElementById('emptySlotMessage');
+      const selectedDateDisplay = document.getElementById('selectedDateDisplay');
+      const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+      const quickDateBtns = document.querySelectorAll('.quick-date-btn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const liveClock = document.getElementById('liveClock');
+      const morningCount = document.getElementById('morningCount');
+      const afternoonCount = document.getElementById('afternoonCount');
+
+      // ---- 工具函数 ----
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function formatDate(date) {
+        return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+      }
+
+      // 获取今天0点
+      function getTodayStart() {
+        const d = new Date();
+        d.setHours(0,0,0,0);
+        return d;
+      }
+
+      // 获取当前精确时间 (用于比较)
+      function now() {
+        return new Date();
+      }
+
+      // 更新页面时钟 (每秒)
+      function updateClock() {
+        const d = new Date();
+        liveClock.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+
+      // ========== 模拟可用时段（基于真实日期动态生成）==========
+      // 规则：根据日期与当天时间动态判断时段是否已过期
+      // 返回一个对象 { morning: [{start, end, label}], afternoon: [...] }
+      // 每个时段自带标签，便于渲染
+      function getBaseSlotsForDate(dateStr) {
+        // 基础时段定义（可根据业务扩展）
+        return {
+          morning: [
+            { start: '09:00', end: '10:00', label: '09:00-10:00' },
+            { start: '10:00', end: '11:00', label: '10:00-11:00' },
+            { start: '11:00', end: '12:00', label: '11:00-12:00' }
+          ],
+          afternoon: [
+            { start: '13:00', end: '14:00', label: '13:00-14:00' },
+            { start: '14:00', end: '15:00', label: '14:00-15:00' },
+            { start: '15:00', end: '16:00', label: '15:00-16:00' },
+            { start: '16:00', end: '17:00', label: '16:00-17:00' }
+          ]
+        };
+      }
+
+      // 核心：获取某天可用的时段（过滤掉已过期的）
+      // 返回 { morning: [...], afternoon: [...], all: [...] }
+      function getAvailableSlotsForDate(dateStr) {
+        const base = getBaseSlotsForDate(dateStr);
+        const todayStr = formatDate(getTodayStart());
+        const isToday = (dateStr === todayStr);
+        const nowTime = now();
+
+        // 若日期早于今天，则全部不可用（但datePicker设置了min，理论不会）
+        if (dateStr < todayStr) {
+          return { morning: [], afternoon: [], all: [] };
+        }
+
+        // 如果日期是今天，需要过滤掉已经结束的时段
+        // 时段结束时间严格晚于当前时间才可预约 (例如当前10:30, 那么09:00-10:00已结束，10:00-11:00进行中不可预约？ 
+        // 为了友好，我们规定: 如果当前时间 >= 时段结束时间，则不可预约。如果当前时间在时段内，也不可预约（因为已经开始了）。
+        // 简单规则: 时段开始时间 > 当前时间 + 30分钟缓冲？更符合实际。这里采用: 时段开始时间 > 当前时间 才可预约 (已开始的不可选)
+        // 但更合理：可预约未来时段，即 start > now 即可预约。例如现在是10:20，那么10:00-11:00已经开始了，不能预约；11:00-12:00可以。
+        // 我们采用严格标准：开始时间必须晚于当前时间（精确到分钟）
+        
+        const morning = [];
+        const afternoon = [];
+
+        base.morning.forEach(slot => {
+          const [startHour, startMin] = slot.start.split(':').map(Number);
+          const slotStart = new Date(nowTime);
+          slotStart.setHours(startHour, startMin, 0, 0);
+          
+          // 如果日期不是今天，则时段全部可用（未来日期）
+          // 如果是今天，则要求 slotStart > nowTime
+          if (!isToday || slotStart > nowTime) {
+            morning.push(slot);
+          }
+        });
+
+        base.afternoon.forEach(slot => {
+          const [startHour, startMin] = slot.start.split(':').map(Number);
+          const slotStart = new Date(nowTime);
+          slotStart.setHours(startHour, startMin, 0, 0);
+          
+          if (!isToday || slotStart > nowTime) {
+            afternoon.push(slot);
+          }
+        });
+
+        const all = [...morning, ...afternoon];
+        return { morning, afternoon, all };
+      }
+
+      // ========== 渲染时段 ==========
+      function renderTimeSlots(dateStr) {
+        const { morning, afternoon, all } = getAvailableSlotsForDate(dateStr);
+        
+        morningSlots.innerHTML = '';
+        afternoonSlots.innerHTML = '';
+
+        // 更新计数
+        morningCount.textContent = morning.length;
+        afternoonCount.textContent = afternoon.length;
+
+        // 如果所有时段都不可用
+        if (all.length === 0) {
+          emptySlotMessage.style.display = 'block';
+          morningSlots.innerHTML = '<span style="font-size:0.85rem; color:#9aaec1;">— 上午无可用时段 —</span>';
+          afternoonSlots.innerHTML = '<span style="font-size:0.85rem; color:#9aaec1;">— 下午无可用时段 —</span>';
+        } else {
+          emptySlotMessage.style.display = 'none';
+
+          // 渲染上午
+          if (morning.length === 0) {
+            morningSlots.innerHTML = '<span style="font-size:0.85rem; color:#9aaec1;">— 上午无可用时段 —</span>';
+          } else {
+            morning.forEach(slot => {
+              const btn = document.createElement('button');
+              btn.classList.add('slot-btn');
+              btn.textContent = slot.label;
+              btn.dataset.slot = slot.label;
+              if (selectedSlot === slot.label) btn.classList.add('selected');
+              btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectTimeSlot(slot.label);
+              });
+              morningSlots.appendChild(btn);
+            });
+          }
+
+          // 渲染下午
+          if (afternoon.length === 0) {
+            afternoonSlots.innerHTML = '<span style="font-size:0.85rem; color:#9aaec1;">— 下午无可用时段 —</span>';
+          } else {
+            afternoon.forEach(slot => {
+              const btn = document.createElement('button');
+              btn.classList.add('slot-btn');
+              btn.textContent = slot.label;
+              btn.dataset.slot = slot.label;
+              if (selectedSlot === slot.label) btn.classList.add('selected');
+              btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectTimeSlot(slot.label);
+              });
+              afternoonSlots.appendChild(btn);
+            });
+          }
+        }
+
+        // 如果已选时段不在可用列表中，清空
+        const availableLabels = all.map(s => s.label);
+        if (selectedSlot && !availableLabels.includes(selectedSlot)) {
+          selectedSlot = null;
+          selectedTimeDisplay.textContent = '— 请选择 —';
+        } else if (selectedSlot) {
+          highlightSelectedSlot();
+          selectedTimeDisplay.textContent = selectedSlot;
+        }
+      }
+
+      function highlightSelectedSlot() {
+        document.querySelectorAll('.slot-btn').forEach(btn => {
+          if (btn.dataset.slot === selectedSlot) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+      }
+
+      function selectTimeSlot(slotLabel) {
+        selectedSlot = slotLabel;
+        highlightSelectedSlot();
+        selectedTimeDisplay.textContent = slotLabel;
+      }
+
+      // ========== 日期更新 ==========
+      function updateDate(dateStr) {
+        if (!dateStr) return;
+        
+        // 边界检查：不能早于今天
+        const todayStr = formatDate(getTodayStart());
+        if (dateStr < todayStr) {
+          dateStr = todayStr;
+        }
+
+        currentDate = dateStr;
+        datePicker.value = dateStr;
+        selectedDateDisplay.textContent = dateStr;
+
+        // 清除已选时段
+        selectedSlot = null;
+        selectedTimeDisplay.textContent = '— 请选择 —';
+
+        renderTimeSlots(dateStr);
+        updateQuickDateActive();
+      }
+
+      // 快捷按钮激活
+      function updateQuickDateActive() {
+        const baseDate = getTodayStart();
+        quickDateBtns.forEach(btn => {
+          const offset = parseInt(btn.dataset.offset, 10);
+          const target = new Date(baseDate);
+          target.setDate(target.getDate() + offset);
+          const targetStr = formatDate(target);
+          if (targetStr === currentDate) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      }
+
+      // 通过偏移量设置日期
+      function setDateByOffset(offset) {
+        const baseDate = getTodayStart();
+        baseDate.setDate(baseDate.getDate() + offset);
+        const dateStr = formatDate(baseDate);
+        updateDate(dateStr);
+      }
+
+      // ========== 初始化 ==========
+      function init() {
+        // 1. 更新时钟并每秒刷新
+        updateClock();
+        setInterval(() => {
+          updateClock();
+          // 如果当前日期是今天，实时刷新时段可用状态（因为可能会有时段过期）
+          const todayStr = formatDate(getTodayStart());
+          if (currentDate === todayStr) {
+            // 重新渲染时段，但保留当前选中的时段如果仍然有效
+            const prevSelected = selectedSlot;
+            renderTimeSlots(currentDate);
+            // 如果之前选中的时段现在过期了，render里已经清空selectedSlot
+            if (prevSelected && selectedSlot === null) {
+              selectedTimeDisplay.textContent = '— 请选择 —';
+            }
+          }
+        }, 1000); // 每秒刷新，保证状态实时（也可减少频率，但时钟每秒需要刷新，顺便检测）
+
+        // 2. 初始化日期选择器 min = 今天
+        const todayStr = formatDate(getTodayStart());
+        datePicker.min = todayStr;
+        // 最大日期设为今天+60天
+        const maxDate = new Date(getTodayStart());
+        maxDate.setDate(maxDate.getDate() + 60);
+        datePicker.max = formatDate(maxDate);
+
+        // 3. 设置默认日期为今天
+        updateDate(todayStr);
+
+        // 4. 日期选择事件
+        datePicker.addEventListener('change', (e) => {
+          const newDate = e.target.value;
+          if (newDate) {
+            // 如果用户选择的日期早于今天，强制修正
+            if (newDate < todayStr) {
+              updateDate(todayStr);
+            } else {
+              updateDate(newDate);
+            }
+          }
+        });
+
+        // 5. 快捷按钮
+        quickDateBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const offset = parseInt(btn.dataset.offset, 10);
+            setDateByOffset(offset);
+          });
+        });
+
+        // 6. 确认预约
+        confirmBtn.addEventListener('click', () => {
+          const date = selectedDateDisplay.textContent;
+          const time = selectedTimeDisplay.textContent;
+
+          if (!time || time === '— 请选择 —') {
+            alert('请先选择一个可用的时间段。');
+            return;
+          }
+
+          // 再次校验时段是否还有效（防止时间流逝已过期）
+          const available = getAvailableSlotsForDate(currentDate);
+          const stillAvailable = available.all.some(s => s.label === time);
+          if (!stillAvailable) {
+            alert('该时段刚刚已过期，请重新选择。');
+            // 刷新时段
+            renderTimeSlots(currentDate);
+            return;
+          }
+
+          // 匹配内容
+          let content = '';
+          if (time.startsWith('09') || time.startsWith('10') || time.startsWith('11')) {
+            content = '上午可约：李奥深度咨询 / 快速答疑 / 代码走查';
+          } else {
+            content = '下午可约：项目评审工作坊 / 深度咨询 / 快速答疑';
+          }
+
+          alert(`✅ 预约成功！\n日期：${date}\n时段：${time}\n可预约内容：${content}\n\n(演示模式，未实际提交)`);
+        });
+
+        // 7. 每30秒额外刷新一次时段（以防万一）
+        setInterval(() => {
+          if (currentDate === todayStr) {
+            renderTimeSlots(currentDate);
+          }
+        }, 30000);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
